@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Finance Tracker</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 640px; margin: 60px auto; padding: 0 20px; background: #fafafa; color: #1a1a1a; }
+  h1 { margin-bottom: 4px; }
+  p.sub { color: #666; margin-top: 0; }
+  table { width: 100%; border-collapse: collapse; margin-top: 24px; }
+  th, td { text-align: left; padding: 8px; border-bottom: 1px solid #eee; }
+  #balance { font-size: 28px; font-weight: 600; margin-top: 16px; }
+  .cat-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #eee; }
+  .error { color: #b3261e; }
+</style>
+</head>
+<body>
+  <h1>Finance Tracker</h1>
+  <p class="sub">Live data from reporting-service.</p>
+  <div id="balance">Loading balance...</div>
+
+  <h3>Spend by category</h3>
+  <div id="categories">Loading...</div>
+
+  <h3>Recent transactions</h3>
+  <table>
+    <thead><tr><th>Date</th><th>Merchant</th><th>Category</th><th>Amount</th></tr></thead>
+    <tbody id="txns"><tr><td colspan="4">Loading...</td></tr></tbody>
+  </table>
+
+  <script>
+    const REPORTING_URL = 'http://localhost:4003';
+
+    fetch(REPORTING_URL + '/balance')
+      .then(r => r.json())
+      .then(d => {
+        document.getElementById('balance').textContent = 'Total spent: £' + d.total_spent.toFixed(2);
+      })
+      .catch(err => {
+        document.getElementById('balance').innerHTML = '<span class="error">Could not reach reporting-service</span>';
+        console.error(err);
+      });
+
+    fetch(REPORTING_URL + '/spend-by-category')
+      .then(r => r.json())
+      .then(rows => {
+        const el = document.getElementById('categories');
+        if (!rows.length) { el.textContent = 'No data yet.'; return; }
+        el.innerHTML = rows.map(r =>
+          '<div class="cat-row"><span>' + r.category + '</span><span>£' + Number(r.total).toFixed(2) + '</span></div>'
+        ).join('');
+      })
+      .catch(err => {
+        document.getElementById('categories').innerHTML = '<span class="error">Could not load categories</span>';
+      });
+
+    fetch(REPORTING_URL + '/transactions')
+      .then(r => r.json())
+      .then(rows => {
+        const tbody = document.getElementById('txns');
+        if (!rows.length) { tbody.innerHTML = '<tr><td colspan="4">No transactions yet.</td></tr>'; return; }
+        tbody.innerHTML = rows.map(t =>
+          '<tr><td>' + t.txn_date + '</td><td>' + t.merchant_name + '</td><td>' + t.category + '</td><td>£' + Number(t.amount).toFixed(2) + '</td></tr>'
+        ).join('');
+      })
+      .catch(err => {
+        document.getElementById('txns').innerHTML = '<tr><td colspan="4" class="error">Could not load transactions</td></tr>';
+      });
+  </script>
+</body>
+</html>
