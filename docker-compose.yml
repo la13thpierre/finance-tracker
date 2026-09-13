@@ -1,0 +1,68 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: finance-postgres
+    environment:
+      POSTGRES_USER: finance
+      POSTGRES_PASSWORD: finance
+      POSTGRES_DB: finance_tracker
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7
+    container_name: finance-redis
+    ports:
+      - "6379:6379"
+
+  auth-service:
+    build: ./auth-service
+    container_name: auth-service-container
+    environment:
+      DATABASE_URL: postgres://finance:finance@postgres:5432/finance_tracker
+      JWT_SECRET: dev-secret-change-me
+      PORT: 4001
+    ports:
+      - "4001:4001"
+    depends_on:
+      - postgres
+
+  ingestion-service:
+    build: ./ingestion-service
+    container_name: ingestion-service-container
+    env_file:
+      - ./ingestion-service/.env
+    environment:
+      REDIS_URL: redis://redis:6379
+    ports:
+      - "4002:4002"
+    depends_on:
+      - redis
+
+  categorization-service:
+    build: ./categorization-service
+    container_name: categorization-service-container
+    environment:
+      DATABASE_URL: postgres://finance:finance@postgres:5432/finance_tracker
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      - postgres
+      - redis
+
+  reporting-service:
+    build: ./reporting-service
+    container_name: reporting-service-container
+    environment:
+      DATABASE_URL: postgres://finance:finance@postgres:5432/finance_tracker
+    ports:
+      - "4003:4003"
+    depends_on:
+      - postgres
+
+  frontend:
+    build: ./frontend
+    container_name: frontend-container
+    ports:
+      - "4000:80"
