@@ -21,7 +21,7 @@ services:
     build: ./auth-service
     container_name: auth-service-container
     environment:
-      DATABASE_URL: postgres://finance:finance@postgres:5432/finance_tracker
+      DATABASE_URL: postgres://finance:finance@localhost:5432/finance_tracker
       JWT_SECRET: dev-secret-change-me
       PORT: 4001
     ports:
@@ -32,21 +32,21 @@ services:
   ingestion-service:
     build: ./ingestion-service
     container_name: ingestion-service-container
+    network_mode: "host"
     env_file:
       - ./ingestion-service/.env
     environment:
-      REDIS_URL: redis://redis:6379
-    ports:
-      - "4002:4002"
+      REDIS_URL: redis://localhost:6379
     depends_on:
       - redis
 
   categorization-service:
     build: ./categorization-service
     container_name: categorization-service-container
+    network_mode: "host"
     environment:
-      DATABASE_URL: postgres://finance:finance@postgres:5432/finance_tracker
-      REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgres://finance:finance@localhost:5432/finance_tracker
+      REDIS_URL: redis://localhost:6379
     depends_on:
       - postgres
       - redis
@@ -54,10 +54,9 @@ services:
   reporting-service:
     build: ./reporting-service
     container_name: reporting-service-container
+    network_mode: "host"
     environment:
-      DATABASE_URL: postgres://finance:finance@postgres:5432/finance_tracker
-    ports:
-      - "4003:4003"
+      DATABASE_URL: postgres://finance:finance@localhost:5432/finance_tracker
     depends_on:
       - postgres
 
