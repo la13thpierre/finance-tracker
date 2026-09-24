@@ -1,0 +1,45 @@
+name: auth-service CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'auth-service/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'auth-service/**'
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: auth-service
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: auth-service/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test --if-present
+
+      - name: Build Docker image
+        run: docker build -t auth-service:${{ github.sha }} .
+
+      - name: Scan image for vulnerabilities
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: auth-service:${{ github.sha }}
+          severity: 'CRITICAL,HIGH'
+          exit-code: '0'
