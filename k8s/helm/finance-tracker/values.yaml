@@ -1,0 +1,29 @@
+postgres:
+  image: postgres:16
+  user: finance
+  password: finance
+  database: finance_tracker
+  storage: 1Gi
+
+redis:
+  image: redis:7
+
+authService:
+  image: auth-service:latest
+  port: 4001
+
+ingestionService:
+  image: ingestion-service:latest
+  port: 4002
+  plaidEnv: sandbox
+
+categorizationService:
+  image: categorization-service:latest
+
+reportingService:
+  image: reporting-service:latest
+  port: 4003
+
+frontend:
+  image: frontend:latest
+  nodePort: 30080

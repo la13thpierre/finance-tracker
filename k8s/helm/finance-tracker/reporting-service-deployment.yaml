@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: reporting-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: reporting-service
+  template:
+    metadata:
+      labels:
+        app: reporting-service
+    spec:
+      containers:
+        - name: reporting-service
+          image: {{ .Values.reportingService.image }}
+          imagePullPolicy: Never
+          ports:
+            - containerPort: {{ .Values.reportingService.port }}
+          env:
+            - name: DATABASE_URL
+              value: postgres://{{ .Values.postgres.user }}:{{ .Values.postgres.password }}@postgres-service:5432/{{ .Values.postgres.database }}

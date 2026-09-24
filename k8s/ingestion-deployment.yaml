@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ingestion-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ingestion-service
+  template:
+    metadata:
+      labels:
+        app: ingestion-service
+    spec:
+      containers:
+        - name: ingestion-service
+          image: ingestion-service:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 4002
+          env:
+            - name: REDIS_URL
+              value: redis://redis-service:6379
+            - name: PLAID_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: plaid-secrets
+                  key: client-id
+            - name: PLAID_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: plaid-secrets
+                  key: secret
+            - name: PLAID_ENV
+              value: sandbox
