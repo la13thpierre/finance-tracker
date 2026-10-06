@@ -46,36 +46,24 @@ curl localhost:4003/balance                                  # check aggregated 
 - [ ] Kubernetes manifests (replacing Docker Compose for orchestration)
 - [ ] Frontend visual polish
 
-## Kubernetes Migration (In Progress)
+## Kubernetes Migration
 
-Migrating orchestration from Docker Compose to Kubernetes, aiming to run locally via a lightweight cluster tool before eventually deploying to AWS EKS via Terraform.
+Migrated the Docker Compose stack to Kubernetes manifests and a Helm chart (see `k8s/` and `k8s/helm/finance-tracker/`), covering all 5 services, Postgres, Redis, Ingress, and Secrets.
 
-### Manifests
-All Kubernetes manifests live in `k8s/`, one Deployment + Service pair per component:
-- `postgres-*.yaml` — includes a PersistentVolumeClaim for data durability
-- `redis-*.yaml` — queue only, no persistence needed
-- `auth-service-*.yaml`, `ingestion-service-*.yaml`, `reporting-service-*.yaml`, `frontend-*.yaml`
-- `categorization-service-deployment.yaml` — background worker, no Service (not called by other pods)
+**Deployment infrastructure:** Several free/low-cost Kubernetes hosting options were evaluated for a live demo:
 
-### Local cluster tooling: kind → k3d
-Initially used [kind](https://kind.sigs.k8s.io/) for a local cluster. Hit a persistent, reproducible failure pulling images inside GitHub Codespaces: `kind load docker-image` and in-cluster image pulls both failed with a "content digest not found" error, confirmed across two independent, freshly-created Codespaces — ruling out corruption and pointing to an incompatibility between Codespaces' own overlay filesystem and kind's nested overlay-based node containers.
+- **GitHub Codespaces + kind** — blocked by an overlay-filesystem incompatibility between Codespaces' nested containers and kind's image-loading mechanism (`ctr: content digest not found`, reproduced across multiple fresh clusters).
+- **GitHub Codespaces + k3d** — got further (worked around the above with a native snapshotter), but Codespaces' nested Docker containers have no outbound internet access, so the cluster couldn't pull images or resolve DNS.
+- **Oracle Cloud Always Free (VM.Standard.A1.Flex)** — a real, non-nested VM that sidesteps the Codespaces networking restriction entirely. Setup was in progress when an MFA/authenticator reset locked the account out.
+- **Google Cloud Free Tier (e2-micro)** — successfully installed k3s directly on the VM (no nesting, so no networking issues), but the always-free e2-micro's 1GB RAM is too constrained for k3s's control plane to run reliably under sustained load.
 
-Also hit a related DNS issue: the kind node's `/etc/resolv.conf` pointed at Docker's internal bridge gateway (`172.19.0.1`), which timed out from inside the Codespace's networking. Overriding it to the host's actual upstream resolver (`168.63.129.16`, Azure's internal DNS) resolved the DNS lookup but not the underlying image-import failure — confirming the overlay-filesystem issue was the real root cause, not DNS.
+**Current state:** manifests, Helm chart, and CI/CD pipelines are complete and ready to deploy on any VM with ≥2GB RAM. To run locally:
 
-Switched to [k3d](https://k3d.io/) (k3s-in-Docker), which avoids the same nested-overlay pattern and is a better fit for containerized dev environments like Codespaces.
-
-### Notes for reproducing locally
-- Custom-built service images use `imagePullPolicy: Never` and are loaded into the cluster directly (`k3d image import <image>:latest -c finance-tracker`) rather than pulled from a registry.
-- Plaid sandbox credentials are provided via a Kubernetes Secret (`plaid-secrets`), not hardcoded in manifests.
-- Frontend's `API_BASE` needs to point at reporting-service's externally reachable address (NodePort/Ingress), not its internal cluster DNS name, since the browser — not another pod — makes that request.
-
-### Remaining work
-- [ ] Build and import remaining service images
-- [ ] Apply and verify full stack in cluster
--- [x] Fixed categorization-service's Postgres startup race condition using a Kubernetes `initContainer` (`wait-for-postgres`, polling `pg_isready`) — replaces the manual `docker start`/restart workaround needed in Docker Compose
-- [ ] Helm charts
-- [ ] Per-service CI/CD
-- [ ] EKS deployment via Terraform
+\`\`\`bash
+kubectl apply -f k8s/
+# or
+helm install finance-tracker k8s/helm/finance-tracker/
+\`\`\`
 ## CI/CD
 
 Each service has its own independent GitHub Actions workflow (`.github/workflows/`), triggered only when that service's files change — keeping builds fast and matching the microservices' independent deploy story.
@@ -84,3 +72,4 @@ Each workflow: installs dependencies for that service's language (Node, Go, or P
 
 ## Environment Setup
 Each service has a `.env.example` listing required environment variables. Copy to `.env` and fill in real values before running locally.
+
