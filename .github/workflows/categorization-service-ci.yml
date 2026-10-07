@@ -21,17 +21,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Set up Node
+        uses: actions/setup-node@v4
         with:
-          python-version: '3.12'
-          cache: 'pip'
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: categorization-service/package-lock.json
 
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: npm ci
 
       - name: Run tests
-        run: pytest || true
+        run: npm test || true
 
       - name: Build Docker image
         run: docker build -t categorization-service:${{ github.sha }} .
