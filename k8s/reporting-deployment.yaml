@@ -19,5 +19,33 @@ spec:
           ports:
             - containerPort: 4003
           env:
-            - name: DATABASE_URL
-              value: postgres://finance:finance@postgres-service:5432/finance_tracker
+                   env:
+          - name: DATABASE_URL
+            valueFrom:
+              secretKeyRef:
+                name: finance-secrets
+                key: DATABASE_URL
+          - name: JWT_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: finance-secrets
+                key: JWT_SECRET
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 4003
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 4003
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 250m
+            memory: 128Mi

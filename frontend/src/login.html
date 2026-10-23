@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Finance Tracker — Log in</title>
+<style>
+.login-link { font-size: 13px; color: var(--muted); text-align: center; margin-top: 16px; }
+.login-link a { color: var(--accent); }
+  :root {
+    --bg: #0f1117;
+    --card: #1a1d27;
+    --border: #2a2e3a;
+    --text: #e4e6eb;
+    --muted: #8b8f9c;
+    --accent: #4f8cff;
+    --red: #ff5c5c;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: -apple-system, Segoe UI, Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+  }
+  form {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 32px;
+    width: 320px;
+  }
+  h1 { font-size: 18px; margin: 0 0 20px; }
+  label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+  input {
+    width: 100%;
+    padding: 10px 12px;
+    margin-bottom: 16px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 14px;
+  }
+  button {
+    width: 100%;
+    padding: 10px;
+    background: var(--accent);
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  button:disabled { opacity: 0.6; cursor: default; }
+  .error {
+    color: var(--red);
+    font-size: 13px;
+    margin: -8px 0 16px;
+    min-height: 16px;
+  }
+</style>
+</head>
+<body>
+
+<form id="loginForm">
+  <h1>Finance Tracker</h1>
+  <label for="email">Email</label>
+  <input type="email" id="email" required>
+  <label for="password">Password</label>
+  <input type="password" id="password" required>
+  <div class="error" id="loginError"></div>
+  <button type="submit" id="submitBtn">Log in</button>
+</form>
+<div class="login-link">New here? <a href="register.html">Create an account</a></div>
+<div class="login-link" style="font-size:13px;color:var(--muted);text-align:center;margin-top:16px">New here? <a href="register.html" style="color:var(--accent)">Create an account</a></div>
+</form>
+
+<script>
+  const AUTH_API_BASE = "http://localhost:4001"; // update to your auth-service forwarded URL
+
+  const form = document.getElementById("loginForm");
+  const errorEl = document.getElementById("loginError");
+  const submitBtn = document.getElementById("submitBtn");
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    errorEl.textContent = "";
+    submitBtn.disabled = true;
+
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+
+    try {
+      const res = await fetch(`${AUTH_API_BASE}/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password })
+      });
+
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        errorEl.textContent = body.error === "invalid credentials"
+          ? "Wrong email or password"
+          : "Couldn't log in — try again";
+        submitBtn.disabled = false;
+        return;
+      }
+
+      const { token } = await res.json();
+      localStorage.setItem("ft_token", token);
+      window.location.href = "index.html";
+    } catch (err) {
+      console.error("Login request failed:", err);
+      errorEl.textContent = "Couldn't reach the server";
+      submitBtn.disabled = false;
+    }
+  });
+</script>
+
+</body>
+</html>
+

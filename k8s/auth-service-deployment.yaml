@@ -18,8 +18,31 @@ spec:
           imagePullPolicy: Never
           ports:
             - containerPort: 4001
-          env:
+                env:
             - name: DATABASE_URL
-              value: postgres://finance:finance@postgres-service:5432/finance_tracker
+              valueFrom:
+                secretKeyRef:
+                  name: finance-secrets
+                  key: DATABASE_URL
             - name: JWT_SECRET
-              value: replace-with-your-actual-secret
+              valueFrom:
+                secretKeyRef:
+                  name: finance-secrets
+                  key: JWT_SECRET
+          readinessProbe:
+            tcpSocket:
+              port: 4001
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 4001
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 250m
+              memory: 128Mi

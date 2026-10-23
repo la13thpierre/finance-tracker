@@ -8,6 +8,20 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💰</text></svg>">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <style>
+  .logout-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 12px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-left: 12px;
+}
+.logout-btn:hover {
+  color: var(--text);
+  border-color: var(--muted);
+}
   :root {
     --bg: #0f1117;
     --card: #1a1d27;
@@ -102,6 +116,14 @@
   .amount-positive { color: var(--green); }
   canvas { max-height: 240px; }
 
+  .budget-track { height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
+  .budget-fill { height: 100%; background: var(--green); }
+  .budget-fill.over { background: var(--red); }
+  .budget-form input {
+    background: var(--bg); border: 1px solid var(--border); color: var(--text);
+    border-radius: 8px; padding: 6px 10px; font-size: 13px;
+  }
+
   /* Loading state */
   .skeleton {
     background: linear-gradient(90deg, var(--border) 25%, #333844 50%, var(--border) 75%);
@@ -137,11 +159,27 @@
 </head>
 <body>
 
-<h1>Finance Tracker</h1>
-<p style="color: var(--muted); font-size: 14px; margin-top: -16px; margin-bottom: 4px;">
-  Personal Finance Tracker — DevOps Portfolio Project
-</p>
-<p style="color: var(--muted); font-size: 12px; margin-top: 0; margin-bottom: 24px;" id="lastUpdated"></p>
+<nav class="navbar">
+  <div class="nav-container">
+    <div class="nav-brand">
+     <span class="nav-logo">Finance Tracker</span>
+    </div>
+   <div class="nav-meta">
+  <span id="lastUpdated" class="nav-updated"></span>
+  <button id="logoutBtn" class="logout-btn">Log out</button>
+</div>
+  </div>
+</nav>
+
+<div class="page-header">
+  <p class="page-subtitle">Personal Finance Tracker — DevOps Portfolio Project</p>
+</div>
+
+<div class="card" style="margin-bottom:24px; display:flex; gap:12px; align-items:center;">
+  <label style="font-size:13px; color:var(--muted);">From <input type="date" id="fromDate"></label>
+  <label style="font-size:13px; color:var(--muted);">To <input type="date" id="toDate"></label>
+  <button id="applyFilter" class="logout-btn">Apply</button>
+</div>
 
 <div class="stats" id="statsRow">
   <div class="stat-card">
@@ -173,6 +211,16 @@
   </div>
 </div>
 
+<div class="card" style="margin-bottom:24px;">
+  <h2>Budgets (this month)</h2>
+  <div id="budgets"><div class="skeleton"></div></div>
+  <div class="budget-form" style="display:flex; gap:8px; margin-top:16px; flex-wrap:wrap;">
+    <input id="budgetCategory" placeholder="Category (e.g. Food & Drink)">
+    <input id="budgetLimit" type="number" placeholder="Monthly limit">
+    <button id="saveBudget" class="logout-btn" style="margin-left:0;">Set budget</button>
+  </div>
+</div>
+
 <div class="card">
   <h2>Recent Transactions</h2>
   <table>
@@ -188,6 +236,15 @@
 <script>
   const API_BASE = "http://localhost:4003"; // update to your reporting-service forwarded URL
 
+  const token = localStorage.getItem("ft_token");
+if (!token) {
+window.location.href = "login.html";
+}
+document.getElementById("logoutBtn").addEventListener("click", () => {
+  localStorage.removeItem("ft_token");
+  window.location.href = "login.html";
+});
+document.getElementById("applyFilter").addEventListener("click", loadDashboard);
   function showError(elementId, message = "Couldn't load data") {
     document.getElementById(elementId).innerHTML =
       `<div class="empty-state">${message}</div>`;
@@ -197,14 +254,28 @@
     let balance, spend, transactions;
 
     try {
-      const [balanceRes, spendRes, txRes] = await Promise.all([
-        fetch(`${API_BASE}/balance`),
-        fetch(`${API_BASE}/spend-by-category`),
-        fetch(`${API_BASE}/transactions`)
-      ]);
-      balance = await balanceRes.json();
-      spend = await spendRes.json();
-      transactions = await txRes.json();
+     const authHeader = { headers: { Authorization: `Bearer ${token}` } };
+    const from = document.getElementById("fromDate").value;
+    const to = document.getElementById("toDate").value;
+    const params = new URLSearchParams();
+    if (from) params.set("from", from);
+    if (to) params.set("to", to);
+    const qs = params.toString() ? `?${params.toString()}` : "";
+    const [balanceRes, spendRes, txRes] = await Promise.all([
+  fetch(`${API_BASE}/balance`, authHeader),
+  fetch(`${API_BASE}/spend-by-category${qs}`, authHeader),
+  fetch(`${API_BASE}/transactions${qs}`, authHeader)
+]);
+
+if (balanceRes.status === 401 || spendRes.status === 401 || txRes.status === 401) {
+  localStorage.removeItem("ft_token");
+  window.location.href = "login.html";
+  return;
+}
+
+balance = await balanceRes.json();
+spend = await spendRes.json();
+transactions = await txRes.json();
     } catch (err) {
       console.error("Failed to load dashboard data:", err);
       showError("balance", "—");
@@ -309,7 +380,67 @@
       `Last updated: ${new Date().toLocaleTimeString()}`;
   }
 
+  async function loadBudgets() {
+    const box = document.getElementById("budgets");
+    try {
+      const res = await fetch(`${API_BASE}/budgets`, { headers: { Authorization: `Bearer ${token}` } });
+      if (res.status === 401) {
+        localStorage.removeItem("ft_token");
+        window.location.href = "login.html";
+        return;
+      }
+      const budgets = await res.json();
+      if (budgets.length === 0) {
+        showError("budgets", "No budgets yet. Set one below.");
+        return;
+      }
+      box.innerHTML = "";
+      budgets.forEach(b => {
+        const spent = Math.abs(b.spent);
+        const pct = Math.min(100, (spent / b.limit) * 100);
+
+        const row = document.createElement("div");
+        row.style.marginBottom = "14px";
+
+        const label = document.createElement("div");
+        label.style.cssText = "display:flex; justify-content:space-between; font-size:14px; margin-bottom:6px;";
+        const name = document.createElement("span");
+        name.textContent = b.category;
+        const amounts = document.createElement("span");
+        amounts.textContent = `$${spent.toFixed(2)} / $${b.limit.toFixed(2)}`;
+        label.append(name, amounts);
+
+        const track = document.createElement("div");
+        track.className = "budget-track";
+        const fill = document.createElement("div");
+        fill.className = "budget-fill" + (spent > b.limit ? " over" : "");
+        fill.style.width = pct + "%";
+        track.appendChild(fill);
+
+        row.append(label, track);
+        box.appendChild(row);
+      });
+    } catch (err) {
+      console.error("Failed to load budgets:", err);
+      showError("budgets", "Couldn't load budgets");
+    }
+  }
+
+  document.getElementById("saveBudget").addEventListener("click", async () => {
+    const category = document.getElementById("budgetCategory").value.trim();
+    const monthly_limit = Number(document.getElementById("budgetLimit").value);
+    if (!category || !(monthly_limit > 0)) return;
+    await fetch(`${API_BASE}/budgets/${encodeURIComponent(category)}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ monthly_limit })
+    });
+    document.getElementById("budgetLimit").value = "";
+    loadBudgets();
+  });
+
   loadDashboard();
+  loadBudgets();
 </script>
 
 </body>

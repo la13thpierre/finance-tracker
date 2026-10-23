@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: finance-config
+data:
+  REDIS_URL: redis://redis-service:6379
+  PLAID_ENV: sandbox
