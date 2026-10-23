@@ -38,7 +38,7 @@ jobs:
         run: docker build -t reporting-service:${{ github.sha }} .
 
       - name: Scan image for vulnerabilities
-         uses: aquasecurity/trivy-action@v0.36.0
+         uses:aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: reporting-service:${{ github.sha }}
           severity: 'CRITICAL,HIGH'
