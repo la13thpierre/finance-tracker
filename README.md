@@ -14,9 +14,17 @@ Five services + two data stores, orchestrated with Docker Compose:
 - **Redis** — transaction sync queue
 - **Postgres** — persistent transaction storage
 
+## Features
+
+- User registration and login (JWT)
+- Dashboard with balance, spend by category, balance trend and recent transactions
+- Date-range filter for transactions and spending
+- Monthly budgets per category with progress bars
+- Live (sandbox) bank data via Plaid
+
 ## Tech Stack
 
-Node.js, Express, Redis, PostgreSQL, Docker Compose, Plaid API (sandbox)
+Node.js, Express, Redis, PostgreSQL, JWT auth, Docker, Docker Compose, Kubernetes, Helm, GitHub Actions, Trivy, Plaid API (sandbox)
 
 ## Running Locally / in Codespaces
 
@@ -28,11 +36,17 @@ docker compose up -d
 
 You'll need a `.env` file in `ingestion-service/` with your own Plaid sandbox credentials (get these free from the [Plaid Dashboard](https://dashboard.plaid.com/)):
 
+```
+PLAID_CLIENT_ID=your_client_id
+PLAID_SECRET=your_sandbox_secret
+PLAID_ENV=sandbox
+```
+
 Then walk through the flow:
 ```bash
 curl -X POST localhost:4002/dev/plaid-sandbox-connect      # returns an item_id
 curl -X POST localhost:4002/sync/<item_id>                  # syncs sandbox transactions
-curl localhost:4003/balance                                  # check aggregated spending
+Then open the frontend at `localhost:4000`, register an account, and log in to see the dashboard.
 ```
 
 ## Known Issues / Workarounds
@@ -43,7 +57,12 @@ curl localhost:4003/balance                                  # check aggregated 
 
 ## Roadmap
 
-- [ ] Kubernetes manifests (replacing Docker Compose for orchestration)
+- [x] Kubernetes manifests and Helm chart
+- [x] Per-service CI with GitHub Actions
+- [x] Login, date-range filter and budgets
+- [ ] Test the full stack on Kubernetes end to end
+- [ ] Unit tests for each service
+- [ ] Deploy to the cloud (EKS) with Terraform
 - [ ] Frontend visual polish
 
 ## Kubernetes Migration
@@ -57,18 +76,36 @@ Migrated the Docker Compose stack to Kubernetes manifests and a Helm chart (see 
 - **Oracle Cloud Always Free (VM.Standard.A1.Flex)** — a real, non-nested VM that sidesteps the Codespaces networking restriction entirely. Setup was in progress when an MFA/authenticator reset locked the account out.
 - **Google Cloud Free Tier (e2-micro)** — successfully installed k3s directly on the VM (no nesting, so no networking issues), but the always-free e2-micro's 1GB RAM is too constrained for k3s's control plane to run reliably under sustained load.
 
-**Current state:** manifests, Helm chart, and CI/CD pipelines are complete and ready to deploy on any VM with ≥2GB RAM. To run locally:
+**What's in the manifests:**
 
-\`\`\`bash
+- A Deployment and Service per service, with health probes (where the service has a port) and CPU/memory limits
+- Postgres as a StatefulSet with its own persistent volume
+- Secrets for the database URL, JWT secret, Postgres password and Plaid keys (never committed to the repo)
+- A ConfigMap for non-secret settings like the Redis URL
+- An Ingress as the single entry point
+
+**Current state:** the manifests and Helm chart are written and CI pipelines are in place. End-to-end testing on a cluster is the next step, and they should run on any VM with ≥2GB RAM.
+
+```bash
+# 1. Create the Secrets first (the values are not stored in the repo)
+kubectl create secret generic finance-secrets \
+  --from-literal=DATABASE_URL=<your-database-url> \
+  --from-literal=JWT_SECRET=<your-jwt-secret> \
+  --from-literal=POSTGRES_PASSWORD=<your-postgres-password>
+kubectl create secret generic plaid-secrets \
+  --from-literal=client-id=<your-plaid-client-id> \
+  --from-literal=secret=<your-plaid-secret>
+
+# 2. Apply the manifests
 kubectl apply -f k8s/
-# or
-helm install finance-tracker k8s/helm/finance-tracker/
-\`\`\`
+```
 ## CI/CD
 
 Each service has its own independent GitHub Actions workflow (`.github/workflows/`), triggered only when that service's files change — keeping builds fast and matching the microservices' independent deploy story.
 
 Each workflow: installs dependencies for that service's language (Node, Go, or Python), runs tests if present, builds the Docker image, and scans it with Trivy for known vulnerabilities.
+
+The Trivy scan currently reports findings without failing the build; it can be tightened once the images are clean.
 
 ## Environment Setup
 Each service has a `.env.example` listing required environment variables. Copy to `.env` and fill in real values before running locally.
