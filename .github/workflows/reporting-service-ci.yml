@@ -5,10 +5,12 @@ on:
     branches: [main]
     paths:
       - 'reporting-service/**'
+      - '.github/workflows/reporting-service-ci.yml'
   pull_request:
     branches: [main]
     paths:
       - 'reporting-service/**'
+      - '.github/workflows/reporting-service-ci.yml'
 
 jobs:
   build-and-test:
