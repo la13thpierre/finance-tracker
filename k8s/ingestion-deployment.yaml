@@ -19,11 +19,16 @@ spec:
           ports:
             - containerPort: 4002
           env:
-               - name: REDIS_URL
+            - name: REDIS_URL
               valueFrom:
                 configMapKeyRef:
                   name: finance-config
                   key: REDIS_URL
+            - name: PLAID_ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: finance-config
+                  key: PLAID_ENV
             - name: PLAID_CLIENT_ID
               valueFrom:
                 secretKeyRef:
@@ -34,25 +39,3 @@ spec:
                 secretKeyRef:
                   name: plaid-secrets
                   key: secret
-            - name: PLAID_ENV
-              valueFrom:
-                configMapKeyRef:
-                  name: finance-config
-                  key: PLAID_ENV
-          readinessProbe:
-            tcpSocket:
-              port: 4002
-            initialDelaySeconds: 5
-            periodSeconds: 10
-          livenessProbe:
-            tcpSocket:
-              port: 4002
-            initialDelaySeconds: 15
-            periodSeconds: 20
-          resources:
-            requests:
-              cpu: 50m
-              memory: 64Mi
-            limits:
-              cpu: 250m
-              memory: 128Mi

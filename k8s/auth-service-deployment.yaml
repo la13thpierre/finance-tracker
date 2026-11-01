@@ -18,7 +18,7 @@ spec:
           imagePullPolicy: Never
           ports:
             - containerPort: 4001
-                env:
+          env:
             - name: DATABASE_URL
               valueFrom:
                 secretKeyRef:
@@ -29,20 +29,3 @@ spec:
                 secretKeyRef:
                   name: finance-secrets
                   key: JWT_SECRET
-          readinessProbe:
-            tcpSocket:
-              port: 4001
-            initialDelaySeconds: 5
-            periodSeconds: 10
-          livenessProbe:
-            tcpSocket:
-              port: 4001
-            initialDelaySeconds: 15
-            periodSeconds: 20
-          resources:
-            requests:
-              cpu: 50m
-              memory: 64Mi
-            limits:
-              cpu: 250m
-              memory: 128Mi
