@@ -99,7 +99,21 @@ kubectl create secret generic plaid-secrets \
 # 2. Apply the manifests
 kubectl apply -f k8s/
 ```
+
+### Running the cluster in Codespaces
+
+Two scripts in `scripts/` handle the Codespaces quirks:
+
+- `scripts/rebuild-cluster.sh` recreates the kind cluster from scratch: builds any missing images, loads them into the cluster, creates the Secrets, applies `k8s/` and waits for the pods. Use it when the cluster is broken or Docker was wiped after a Codespace restart. It deletes the existing cluster, so the Postgres data is lost.
+- `scripts/plaid-sync.sh` pulls the Plaid sandbox transactions and pushes them into the cluster's Redis queue. Run it after the pods are up, since a fresh Postgres starts empty.
+
+**Why the Plaid sync runs outside the cluster:** pods in a kind cluster inside GitHub Codespaces have no outbound internet access (DNS and direct TCP to the outside both time out), so the ingestion pod can't reach `sandbox.plaid.com`. The sync script instead port-forwards the cluster's Redis, runs the ingestion service locally against it, and the categorization pod in the cluster processes the queue as normal. This is a Codespaces limitation and shouldn't apply on EKS.
+
+Requires `ingestion-service/.env` with the Plaid sandbox keys (the file is gitignored, so recreate it in a new Codespace).
+
 ## CI/CD
+
+
 
 Each service has its own independent GitHub Actions workflow (`.github/workflows/`), triggered only when that service's files change — keeping builds fast and matching the microservices' independent deploy story.
 
