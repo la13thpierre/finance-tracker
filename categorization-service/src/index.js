@@ -13,6 +13,10 @@ const RULES = [
   { match: /uber|lyft|transit|train/i, category: 'Transport' },
   { match: /netflix|spotify|disney/i, category: 'Entertainment' },
   { match: /rent|mortgage/i, category: 'Housing' },
+  { match: /^ach |automatic payment|cd deposit/i, category: 'Transfers' },
+  { match: /airlines/i, category: 'Travel' },
+  { match: /kfc|mcdonald/i, category: 'Food & Drink' },
+  { match: /bicycle/i, category: 'Shopping' },
 ];
 
 function categorize(merchantName) {
