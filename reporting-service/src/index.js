@@ -25,7 +25,7 @@ app.get('/health', (req, res) => res.json({ status: 'ok', service: 'reporting-se
 
 app.get('/transactions', requireAuth, async (req, res) => {
   const { from, to } = req.query;
-  const conditions = [];
+  const conditions = ["category <> 'Transfers'"];
   const params = [];
   if (from) { params.push(from); conditions.push(`txn_date >= $${params.length}`); }
   if (to) { params.push(to); conditions.push(`txn_date <= $${params.length}`); }
@@ -39,7 +39,7 @@ app.get('/transactions', requireAuth, async (req, res) => {
 
 app.get('/spend-by-category', requireAuth, async (req, res) => {
   const { from, to } = req.query;
-  const conditions = [];
+  const conditions = ["category <> 'Transfers'"];
   const params = [];
   if (from) { params.push(from); conditions.push(`txn_date >= $${params.length}`); }
   if (to) { params.push(to); conditions.push(`txn_date <= $${params.length}`); }
