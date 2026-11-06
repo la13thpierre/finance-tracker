@@ -17,6 +17,18 @@ spec:
         - name: postgres
           image: postgres:16
           imagePullPolicy: IfNotPresent
+          readinessProbe:
+            exec:
+              command: ["pg_isready", "-U", "finance", "-d", "finance_tracker"]
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
           ports:
             - containerPort: 5432
           env:
