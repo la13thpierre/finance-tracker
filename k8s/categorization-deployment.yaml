@@ -26,24 +26,7 @@ spec:
       containers:
         - name: categorization-service
           image: categorization-service:latest
-                      imagePullPolicy: Never
-            readinessProbe:
-              tcpSocket:
-                port: 4004
-              initialDelaySeconds: 5
-              periodSeconds: 10
-            livenessProbe:
-              tcpSocket:
-                port: 4004
-              initialDelaySeconds: 15
-              periodSeconds: 20
-            resources:
-              requests:
-                cpu: 50m
-                memory: 64Mi
-              limits:
-                cpu: 250m
-                memory: 256Mi
+          imagePullPolicy: Never
           env:
             - name: REDIS_URL
               valueFrom:

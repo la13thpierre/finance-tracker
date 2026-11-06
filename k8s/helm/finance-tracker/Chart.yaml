@@ -1,4 +1,4 @@
--apiVersion: v2
+apiVersion: v2
 name: finance-tracker
 description: Helm chart for the finance-tracker microservices app
 type: application

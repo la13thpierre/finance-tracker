@@ -6,5 +6,5 @@ spec:
   selector:
     app: auth-service
   ports:
-    - port: {{ .Values.authService.port }}
-      targetPort: {{ .Values.authService.port }}
+    - port: 4001
+      targetPort: 4001

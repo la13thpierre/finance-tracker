@@ -21,4 +21,4 @@ spec:
               service:
                 name: reporting-service
                 port:
-                  number: {{ .Values.reportingService.port }}
+                  number: 4003

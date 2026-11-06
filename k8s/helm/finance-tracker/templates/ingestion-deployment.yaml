@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ingestion-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ingestion-service
+  template:
+    metadata:
+      labels:
+        app: ingestion-service
+    spec:
+      containers:
+        - name: ingestion-service
+          image: ingestion-service:latest
+          imagePullPolicy: Never
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 4002
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 4002
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
+          ports:
+            - containerPort: 4002
+          env:
+            - name: REDIS_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: finance-config
+                  key: REDIS_URL
+            - name: PLAID_ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: finance-config
+                  key: PLAID_ENV
+            - name: PLAID_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: plaid-secrets
+                  key: client-id
+            - name: PLAID_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: plaid-secrets
+                  key: secret

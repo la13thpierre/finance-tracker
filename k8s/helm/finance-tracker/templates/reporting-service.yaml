@@ -6,5 +6,5 @@ spec:
   selector:
     app: reporting-service
   ports:
-    - port: {{ .Values.reportingService.port }}
-      targetPort: {{ .Values.reportingService.port }}
+    - port: 4003
+      targetPort: 4003

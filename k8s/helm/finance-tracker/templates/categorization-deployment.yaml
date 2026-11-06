@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: categorization-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: categorization-service
+  template:
+    metadata:
+      labels:
+        app: categorization-service
+    spec:
+      initContainers:
+        - name: wait-for-postgres
+          image: postgres:16
+          command:
+            - sh
+            - -c
+            - |
+              until pg_isready -h postgres-service -p 5432 -U finance; do
+                echo "Waiting for postgres..."
+                sleep 2
+              done
+      containers:
+        - name: categorization-service
+          image: categorization-service:latest
+          imagePullPolicy: Never
+          readinessProbe:
+            tcpSocket:
+              port: 4004
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 4004
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
+          env:
+            - name: REDIS_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: finance-config
+                  key: REDIS_URL
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: finance-secrets
+                  key: DATABASE_URL
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 250m
+              memory: 128Mi

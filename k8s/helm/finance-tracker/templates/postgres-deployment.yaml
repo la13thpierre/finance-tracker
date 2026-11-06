@@ -15,20 +15,42 @@ spec:
     spec:
       containers:
         - name: postgres
-          image: {{ .Values.postgres.image }}
-          env:
-            - name: POSTGRES_USER
-              value: {{ .Values.postgres.user }}
-            - name: POSTGRES_PASSWORD
-              value: {{ .Values.postgres.password }}
-            - name: POSTGRES_DB
-              value: {{ .Values.postgres.database }}
+          image: postgres:16
+          imagePullPolicy: IfNotPresent
+          readinessProbe:
+            exec:
+              command: ["pg_isready", "-U", "finance", "-d", "finance_tracker"]
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
           ports:
             - containerPort: 5432
+          env:
+            - name: POSTGRES_USER
+              value: finance
+            - name: POSTGRES_DB
+              value: finance_tracker
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: finance-secrets
+                  key: POSTGRES_PASSWORD
           volumeMounts:
             - name: postgres-storage
               mountPath: /var/lib/postgresql/data
-      volumes:
-        - name: postgres-storage
-          persistentVolumeClaim:
-            claimName: postgres-pvc
+  volumeClaimTemplates:
+    - metadata:
+        name: postgres-storage
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi
