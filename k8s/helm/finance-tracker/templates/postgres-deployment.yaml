@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: postgres
-          image: postgres:16
+          image: {{ .Values.postgres.image }}
           imagePullPolicy: IfNotPresent
           readinessProbe:
             exec:
@@ -53,4 +53,4 @@ spec:
         accessModes: ["ReadWriteOnce"]
         resources:
           requests:
-            storage: 1Gi
+            storage: {{ .Values.postgres.storage }}

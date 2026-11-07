@@ -14,7 +14,7 @@ spec:
     spec:
       initContainers:
         - name: wait-for-postgres
-          image: postgres:16
+          image: {{ .Values.postgres.image }}
           command:
             - sh
             - -c
@@ -25,16 +25,16 @@ spec:
               done
       containers:
         - name: categorization-service
-          image: categorization-service:latest
+          image: {{ .Values.categorizationService.image }}
           imagePullPolicy: Never
           readinessProbe:
             tcpSocket:
-              port: 4004
+              port: {{ .Values.categorizationService.port }}
             initialDelaySeconds: 5
             periodSeconds: 10
           livenessProbe:
             tcpSocket:
-              port: 4004
+              port: {{ .Values.categorizationService.port }}
             initialDelaySeconds: 15
             periodSeconds: 20
           resources:

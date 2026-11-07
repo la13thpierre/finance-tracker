@@ -4,4 +4,4 @@ metadata:
   name: finance-config
 data:
   REDIS_URL: redis://redis-service:6379
-  PLAID_ENV: sandbox
+  PLAID_ENV: {{ .Values.ingestionService.plaidEnv | quote }}

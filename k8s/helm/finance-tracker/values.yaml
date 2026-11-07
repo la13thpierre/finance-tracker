@@ -1,7 +1,6 @@
 postgres:
   image: postgres:16
   user: finance
-  password: finance
   database: finance_tracker
   storage: 1Gi
 
@@ -18,6 +17,7 @@ ingestionService:
   plaidEnv: sandbox
 
 categorizationService:
+  port: 4004
   image: categorization-service:latest
 
 reportingService:

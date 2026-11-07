@@ -14,18 +14,18 @@ spec:
     spec:
       containers:
         - name: ingestion-service
-          image: ingestion-service:latest
+          image: {{ .Values.ingestionService.image }}
           imagePullPolicy: Never
           readinessProbe:
             httpGet:
               path: /health
-              port: 4002
+              port: {{ .Values.ingestionService.port }}
             initialDelaySeconds: 5
             periodSeconds: 10
           livenessProbe:
             httpGet:
               path: /health
-              port: 4002
+              port: {{ .Values.ingestionService.port }}
             initialDelaySeconds: 15
             periodSeconds: 20
           resources:
@@ -36,7 +36,7 @@ spec:
               cpu: 250m
               memory: 256Mi
           ports:
-            - containerPort: 4002
+            - containerPort: {{ .Values.ingestionService.port }}
           env:
             - name: REDIS_URL
               valueFrom:

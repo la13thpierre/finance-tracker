@@ -7,5 +7,5 @@ spec:
   selector:
     app: categorization-service
   ports:
-    - port: 4003
-      targetPort: 4003
+    - port: {{ .Values.categorizationService.port }}
+      targetPort: {{ .Values.categorizationService.port }}

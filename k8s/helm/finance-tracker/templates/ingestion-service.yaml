@@ -6,5 +6,5 @@ spec:
   selector:
     app: ingestion-service
   ports:
-    - port: 4002
-      targetPort: 4002
+    - port: {{ .Values.ingestionService.port }}
+      targetPort: {{ .Values.ingestionService.port }}

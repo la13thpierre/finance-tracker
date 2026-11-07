@@ -14,18 +14,18 @@ spec:
     spec:
       containers:
         - name: auth-service
-          image: auth-service:latest
+          image: {{ .Values.authService.image }}
           imagePullPolicy: Never
           readinessProbe:
             httpGet:
               path: /health
-              port: 4001
+              port: {{ .Values.authService.port }}
             initialDelaySeconds: 5
             periodSeconds: 10
           livenessProbe:
             httpGet:
               path: /health
-              port: 4001
+              port: {{ .Values.authService.port }}
             initialDelaySeconds: 15
             periodSeconds: 20
           resources:
@@ -36,7 +36,7 @@ spec:
               cpu: 250m
               memory: 256Mi
           ports:
-            - containerPort: 4001
+            - containerPort: {{ .Values.authService.port }}
           env:
             - name: DATABASE_URL
               valueFrom:
