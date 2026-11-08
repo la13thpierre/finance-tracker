@@ -8,3 +8,6 @@ terraform/.terraform/
 *.tfstate
 *.tfstate.*
 *.tfvars
+
+.terraform/
+terraform/local/kubeconfig
