@@ -111,6 +111,16 @@ Two scripts in `scripts/` handle the Codespaces quirks:
 
 Requires `ingestion-service/.env` with the Plaid sandbox keys (the file is gitignored, so recreate it in a new Codespace).
 
+### Infrastructure as code (Terraform)
+
+`terraform/local` builds the whole local environment from code: a kind cluster (Kubernetes v1.31.0), the two Kubernetes Secrets, and a Helm release of `k8s/helm/finance-tracker`. Secret values are passed in as `TF_VAR_*` environment variables read from `ingestion-service/.env`, so nothing sensitive is committed, and state files are git-ignored.
+
+`scripts/tf-rebuild.sh` runs the full routine in one command: it checks whether the cluster answers, resets the Terraform state if it has died, builds and loads the service images, then applies Terraform and prints the pod list.
+
+The cluster node image is pinned to v1.31.0 so it matches the installed `kind` tool, which cannot load images into newer nodes.
+
+Next step: an EKS cluster on AWS, provisioned the same way with Terraform. The AWS provider is already set up and tested in `terraform/main.tf`.
+
 ## CI/CD
 
 
