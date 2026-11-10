@@ -121,6 +121,10 @@ The cluster node image is pinned to v1.31.0 so it matches the installed `kind` t
 
 Next step: an EKS cluster on AWS, provisioned the same way with Terraform. The AWS provider is already set up and tested in `terraform/main.tf`.
 
+### EKS (plan-only)
+
+`terraform/eks` describes the AWS version of this setup: a VPC with public and private subnets, an EKS cluster with a managed node group of two t3.medium servers, and an ECR repository for each service. It is only ever run with `terraform plan` (59 resources, nothing created). A real EKS cluster costs roughly $6-8 per day with no free tier, so I deliberately do not leave it running. To deploy it for real: pick a current standard-support Kubernetes version, run `terraform apply`, push the images to ECR, install the Helm chart, then `terraform destroy` the same day.
+
 ## CI/CD
 
 
