@@ -1,5 +1,12 @@
 # Personal Finance Tracker — DevOps Portfolio Project
 
+[![auth-service CI](https://github.com/la13thpierre/finance-tracker/actions/workflows/auth-service-ci.yml/badge.svg)](https://github.com/la13thpierre/finance-tracker/actions/workflows/auth-service-ci.yml)
+[![ingestion-service CI](https://github.com/la13thpierre/finance-tracker/actions/workflows/ingestion-service-ci.yml/badge.svg)](https://github.com/la13thpierre/finance-tracker/actions/workflows/ingestion-service-ci.yml)
+[![categorization-service CI](https://github.com/la13thpierre/finance-tracker/actions/workflows/categorization-service-ci.yml/badge.svg)](https://github.com/la13thpierre/finance-tracker/actions/workflows/categorization-service-ci.yml)
+[![reporting-service CI](https://github.com/la13thpierre/finance-tracker/actions/workflows/reporting-service-ci.yml/badge.svg)](https://github.com/la13thpierre/finance-tracker/actions/workflows/reporting-service-ci.yml)
+[![frontend CI](https://github.com/la13thpierre/finance-tracker/actions/workflows/frontend-ci.yml/badge.svg)](https://github.com/la13thpierre/finance-tracker/actions/workflows/frontend-ci.yml)
+
+
 A microservices-based personal finance tracker built to demonstrate containerization, service orchestration, and real-world infrastructure troubleshooting. Connects to Plaid's **sandbox** API (fake bank data only — no real bank accounts or money involved).
 
 ## Architecture
