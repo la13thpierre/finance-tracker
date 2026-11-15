@@ -234,7 +234,7 @@
 </div>
 
 <script>
-  const API_BASE = "http://localhost:4003"; // update to your reporting-service forwarded URL
+  const API_BASE = location.hostname.endsWith(".app.github.dev") ? location.origin.replace(/-[0-9]+[.]/, "-4003.") : "http://localhost:4003";
 
   const token = localStorage.getItem("ft_token");
 if (!token) {

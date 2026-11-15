@@ -82,7 +82,7 @@
 </form>
 
 <script>
-  const AUTH_API_BASE = "http://localhost:4001"; // update to your auth-service forwarded URL
+  const AUTH_API_BASE = location.hostname.endsWith(".app.github.dev") ? location.origin.replace(/-[0-9]+[.]/, "-4001.") : "http://localhost:4001";
 
   const form = document.getElementById("loginForm");
   const errorEl = document.getElementById("loginError");
