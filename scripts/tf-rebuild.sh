@@ -11,7 +11,7 @@ export TF_VAR_postgres_password=finance
 cd terraform/local
 if ! KUBECONFIG=kubeconfig kubectl get nodes >/dev/null 2>&1; then
   echo "Cluster not answering - resetting"
-  docker rm -f finance-tf-control-plane 2>/dev/null || true
+  docker rm -fv finance-tf-control-plane 2>/dev/null || true
   rm -f terraform.tfstate terraform.tfstate.backup kubeconfig
 fi
 terraform init -input=false
