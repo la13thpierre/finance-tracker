@@ -70,7 +70,7 @@
   <label for="email">Email</label>
   <input type="email" id="email" required>
   <label for="password">Password</label>
-  <input type="password" id="password" required minlength="8">
+ <div style="position:relative"><input type="password" id="password" required minlength="8" style="padding-right:44px"><button type="button" title="Show or hide password" onclick="const p=document.getElementById('password');p.type=p.type==='password'?'text':'password'" style="width:auto;margin:0;padding:0;position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px">👁</button></div>
   <div class="error" id="registerError"></div>
   <div class="success" id="registerSuccess"></div>
   <button type="submit" id="submitBtn">Create account</button>
