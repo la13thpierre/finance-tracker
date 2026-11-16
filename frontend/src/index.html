@@ -312,10 +312,10 @@ transactions = await txRes.json();
         options: { plugins: { legend: { labels: { color: "#e4e6eb" } } } }
       });
 
-      const topIdx = totals.indexOf(Math.max(...totals));
+      const topIdx = totals.map(Number).indexOf(Math.max(...totals.map(Number)));
       document.getElementById("topCategory").textContent = categories[topIdx];
 
-      const monthTotal = totals.reduce((a, b) => a + b, 0);
+      const monthTotal = totals.reduce((a, b) => a + Number(b), 0);
       document.getElementById("monthSpend").textContent = `$${monthTotal.toFixed(2)}`;
     }
 
