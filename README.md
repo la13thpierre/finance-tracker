@@ -11,7 +11,7 @@ A microservices-based personal finance tracker built to demonstrate containeriza
 
 ## Architecture
 
-Five services + two data stores, orchestrated with Docker Compose:
+Five services + two data stores, running on kubernetes(Docker Compose also works for local runs):
 
 - **auth-service** — user registration/login (port 4001)
 - **ingestion-service** — connects to Plaid sandbox, syncs transactions into Redis (port 4002)
