@@ -56,7 +56,7 @@ module "eks" {
     aws-ebs-csi-driver = {
       most_recent = true
     }
-  }   
+  }
   eks_managed_node_groups = {
     default = {
       ami_type       = "AL2023_x86_64_STANDARD"
