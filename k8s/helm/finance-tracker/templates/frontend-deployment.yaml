@@ -15,7 +15,7 @@ spec:
       containers:
         - name: frontend
           image: {{ .Values.frontend.image }}
-          imagePullPolicy: Never
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
           readinessProbe:
             httpGet:
               path: /

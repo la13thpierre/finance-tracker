@@ -15,7 +15,7 @@ spec:
       containers:
         - name: reporting-service
           image: {{ .Values.reportingService.image }}
-          imagePullPolicy: Never
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
           readinessProbe:
             httpGet:
               path: /health

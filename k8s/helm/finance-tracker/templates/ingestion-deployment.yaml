@@ -15,7 +15,7 @@ spec:
       containers:
         - name: ingestion-service
           image: {{ .Values.ingestionService.image }}
-          imagePullPolicy: Never
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
           readinessProbe:
             httpGet:
               path: /health

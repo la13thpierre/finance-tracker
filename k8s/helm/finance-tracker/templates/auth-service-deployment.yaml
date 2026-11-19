@@ -15,7 +15,7 @@ spec:
       containers:
         - name: auth-service
           image: {{ .Values.authService.image }}
-          imagePullPolicy: Never
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
           readinessProbe:
             httpGet:
               path: /health

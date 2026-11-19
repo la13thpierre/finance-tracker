@@ -1,3 +1,4 @@
+imagePullPolicy: Never
 postgres:
   image: postgres:16
   user: finance

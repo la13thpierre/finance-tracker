@@ -1,0 +1,13 @@
+imagePullPolicy: Always
+
+authService:
+  image: ACCOUNT_ID.dkr.ecr.eu-north-1.amazonaws.com/finance-tracker/auth-service:latest
+ingestionService:
+  image: ACCOUNT_ID.dkr.ecr.eu-north-1.amazonaws.com/finance-tracker/ingestion-service:latest
+categorizationService:
+  image: ACCOUNT_ID.dkr.ecr.eu-north-1.amazonaws.com/finance-tracker/categorization-service:latest
+reportingService:
+  image: ACCOUNT_ID.dkr.ecr.eu-north-1.amazonaws.com/finance-tracker/reporting-service:latest
+frontend:
+  image: ACCOUNT_ID.dkr.ecr.eu-north-1.amazonaws.com/finance-tracker/frontend:latest
+  serviceType: LoadBalancer
