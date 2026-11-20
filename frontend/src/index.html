@@ -299,7 +299,7 @@ transactions = await txRes.json();
       const sortedSpend = [...spend].sort((a, b) => b.total - a.total);
       const categories = sortedSpend.map(s => s.category);
       const totals = sortedSpend.map(s => s.total);
-
+      Chart.getChart("categoryChart")?.destroy();
       new Chart(document.getElementById("categoryChart"), {
         type: "doughnut",
         data: {
@@ -352,7 +352,7 @@ transactions = await txRes.json();
         trendLabels.push(new Date(tx.date).toLocaleDateString());
         trendData.push(running);
       });
-
+      Chart.getChart("trendChart")?.destroy();
       new Chart(document.getElementById("trendChart"), {
         type: "line",
         data: {
