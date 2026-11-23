@@ -4,7 +4,8 @@ on:
   push:
     branches: [main]
     paths:
-      - 'terraform/**'
+    - 'terraform/**'
+    - '.github/workflows/terraform-ci.yml'
   pull_request:
     branches: [main]
     paths:
