@@ -11,7 +11,7 @@ A microservices-based personal finance tracker built to demonstrate containeriza
 
 ## Architecture
 
-Five services + two data stores, running on kubernetes(Docker Compose also works for local runs):
+Five services + two data stores, running on kubernetes (Docker Compose also works for local runs):
 
 - **auth-service** — user registration/login (port 4001)
 - **ingestion-service** — connects to Plaid sandbox, syncs transactions into Redis (port 4002)
@@ -31,7 +31,7 @@ Five services + two data stores, running on kubernetes(Docker Compose also works
 
 ## Tech Stack
 
-Node.js, Express, Redis, PostgreSQL, JWT auth, Docker, Docker Compose, Kubernetes, Helm, GitHub Actions, Trivy, Plaid API (sandbox)
+Node.js, Express, Redis, PostgreSQL, JWT auth, Docker, Docker Compose, Kubernetes, Helm,Terraform, AWS (EKS, ECR),GitHub Actions, Trivy, Plaid API (sandbox)
 
 ## Running Locally / in Codespaces
 
@@ -54,7 +54,7 @@ Then walk through the flow:
 curl -X POST localhost:4002/dev/plaid-sandbox-connect      # returns an item_id
 curl -X POST localhost:4002/sync/<item_id>                  # syncs sandbox transactions
 Then open the frontend at `localhost:4000`, register an account, and log in to see the dashboard.
-```
+
 
 ## Known Issues / Workarounds
 
@@ -67,9 +67,10 @@ Then open the frontend at `localhost:4000`, register an account, and log in to s
 - [x] Kubernetes manifests and Helm chart
 - [x] Per-service CI with GitHub Actions
 - [x] Login, date-range filter and budgets
-- [ ] Test the full stack on Kubernetes end to end
+- [x] Test the full stack on Kubernetes end to end
 - [ ] Unit tests for each service
 - [ ] Deploy to the cloud (EKS) with Terraform
+  [ ] Monitoring with Prometheus and Grafana
 - [ ] Frontend visual polish
 
 ## Kubernetes Migration
@@ -131,6 +132,11 @@ Next step: an EKS cluster on AWS, provisioned the same way with Terraform. The A
 ### EKS (plan-only)
 
 `terraform/eks` describes the AWS version of this setup: a VPC with public and private subnets, an EKS cluster with a managed node group of two t3.medium servers, and an ECR repository for each service. It is only ever run with `terraform plan` (59 resources, nothing created). A real EKS cluster costs roughly $6-8 per day with no free tier, so I deliberately do not leave it running. To deploy it for real: pick a current standard-support Kubernetes version, run `terraform apply`, push the images to ECR, install the Helm chart, then `terraform destroy` the same day.
+
+### Monitoring (planned)
+
+
+Prometheus and Grafna on the same local cluster using the 'kube-prometheus-stack' Helm chart, with dashboards for pod CPU, memory and restarts. Screenshots will go here once its running.
 
 ## CI/CD
 
