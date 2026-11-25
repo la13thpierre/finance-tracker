@@ -135,12 +135,9 @@ Next step: an EKS cluster on AWS, provisioned the same way with Terraform. The A
 
 ### Monitoring (planned)
 
-
-Prometheus and Grafna on the same local cluster using the 'kube-prometheus-stack' Helm chart, with dashboards for pod CPU, memory and restarts. Screenshots will go here once its running.
+Prometheus and Grafana on the same local cluster using the `kube-prometheus-stack` Helm chart, with dashboards for pod CPU, memory and restarts. Screenshots will go here once it's running.
 
 ## CI/CD
-
-
 
 Each service has its own independent GitHub Actions workflow (`.github/workflows/`), triggered only when that service's files change — keeping builds fast and matching the microservices' independent deploy story.
 
